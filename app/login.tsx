@@ -3,13 +3,15 @@ import { FormLayout } from "@/components/ui/forms/FormLayoutComponent";
 import { DefaultInput } from "@/components/ui/inputs/DefaultInput";
 import { Colors, Styles } from "@/constants/design-system";
 import { useRouter } from "expo-router";
+import {
+  sendEmailVerification,
+  signInWithEmailAndPassword
+} from "firebase/auth";
 import { useState } from "react";
-import { Image, Alert } from "react-native";
+import { Alert, Image } from "react-native";
 import { Text } from "tamagui";
 import { signIn } from "../auth";
-import { signInWithEmailAndPassword, signOut, sendEmailVerification } from "firebase/auth";
 import { auth } from "../firebaseConfig";
-
 
 export default function LoginScreen() {
   const router = useRouter();
@@ -17,7 +19,8 @@ export default function LoginScreen() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [sendVerificationEmailAgain, setSendVerificationEmailAgain] = useState(false)
+  const [sendVerificationEmailAgain, setSendVerificationEmailAgain] =
+    useState(false);
 
   const handleSignIn = async () => {
     setError("");
@@ -38,7 +41,7 @@ export default function LoginScreen() {
         setError("Kontot är inaktiverat");
       } else if (err.message === "EMAIL_NOT_VERIFIED") {
         setError("Du måste verifiera din email först. Kolla din inkorg!");
-        setSendVerificationEmailAgain(true)
+        setSendVerificationEmailAgain(true);
       } else {
         setError("Kunde inte logga in");
         console.error(err.code);
@@ -48,32 +51,32 @@ export default function LoginScreen() {
     }
   };
 
-const handleResendEmail = async () => {
-  try {
-    const userCredential = await signInWithEmailAndPassword(
-      auth,
-      email.trim(),
-      password
-    );
-    
-    await sendEmailVerification(userCredential.user);
-    
-    Alert.alert(
-      "E-post skickad",
-      "Vi har skickat ett nytt verifieringsmail till " + email
-    );
+  const handleResendEmail = async () => {
+    try {
+      const userCredential = await signInWithEmailAndPassword(
+        auth,
+        email.trim(),
+        password,
+      );
 
-    router.push({
-      pathname: '/register',
-      params: { fromLogin: 'true', email: email.trim() }
-    });
-  } catch (error) {
-    Alert.alert(
-      "Fel",
-      "Kunde inte skicka e-post. Kontrollera att e-post och lösenord är rätt."
-    );
-  }
-};
+      await sendEmailVerification(userCredential.user);
+
+      Alert.alert(
+        "E-post skickad",
+        "Vi har skickat ett nytt verifieringsmail till " + email,
+      );
+
+      router.push({
+        pathname: "/register",
+        params: { fromLogin: "true", email: email.trim() },
+      });
+    } catch (error) {
+      Alert.alert(
+        "Fel",
+        "Kunde inte skicka e-post. Kontrollera att e-post och lösenord är rätt.",
+      );
+    }
+  };
 
   return (
     <FormLayout>
@@ -99,15 +102,14 @@ const handleResendEmail = async () => {
         secureTextEntry={true}
         autoCapitalize="none"
       />
-            <Text style={Styles.actionL}>{error}</Text>
-    {sendVerificationEmailAgain ? <>
-            <DefaultButton
-            onPress={handleResendEmail}
-            >
-        Skicka nytt verifieringsmail
-      </DefaultButton>
+      <Text style={Styles.actionL}>{error}</Text>
+      {sendVerificationEmailAgain ? (
+        <>
+          <DefaultButton onPress={handleResendEmail}>
+            Skicka nytt verifieringsmail
+          </DefaultButton>
         </>
-       : ""}
+      ) : null}
 
       <DefaultButton onPress={handleSignIn} disabled={loading}>
         {loading ? "Loggar in.." : "Logga in"}
