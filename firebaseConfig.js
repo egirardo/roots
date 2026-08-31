@@ -6,13 +6,13 @@ import { getStorage } from "firebase/storage";
 import { getAuth } from "firebase/auth";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyD6SCHQ-4fUscJS8-UWMJdngtqFQtsJ0zI",
-  authDomain: "roots-cd39a.firebaseapp.com",
-  projectId: "roots-cd39a",
-  storageBucket: "roots-cd39a.firebasestorage.app",
-  messagingSenderId: "872631865213",
-  appId: "1:872631865213:web:f134fe9fb5cdf2fe4c0614",
-  measurementId: "G-YNGG0LDKX4",
+  apiKey: "AIzaSyDnH1JY-IE2oiZjkLWwWC1bqtVc_Vs5cyQ",
+  authDomain: "roots-58765.firebaseapp.com",
+  projectId: "roots-58765",
+  storageBucket: "roots-58765.firebasestorage.app",
+  messagingSenderId: "113491726456",
+  appId: "1:113491726456:web:7d83364a2e5fa326e01d8d",
+  measurementId: "G-38MW25ZQVP",
 };
 
 const app = initializeApp(firebaseConfig);
