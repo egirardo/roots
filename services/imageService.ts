@@ -1,9 +1,12 @@
+import * as FileSystem from "expo-file-system/legacy";
 import { manipulateAsync, SaveFormat } from "expo-image-manipulator";
 import * as ImagePicker from "expo-image-picker";
-import * as FileSystem from "expo-file-system/legacy";
 import { Alert } from "react-native";
 
+// Swap out these values with your own Cloudinary credentials
 const CLOUDINARY_CLOUD_NAME = "dc4u3rzmx";
+// Below is the unsigned upload preset you need to create in Cloudinary.
+// Settings > Upload > Upload Presets > Add upload preset > Upload Preset Name: roots_uploads > Signing Mode: Unsigned > Save
 const CLOUDINARY_UPLOAD_PRESET = "roots_uploads";
 
 export interface OptimizationOptions {
@@ -15,7 +18,7 @@ export interface OptimizationOptions {
 
 export async function optimizeImage(
   imageUri: string,
-  options: OptimizationOptions = {}
+  options: OptimizationOptions = {},
 ): Promise<string> {
   const { maxWidth = 1200, quality = 0.7, format = SaveFormat.JPEG } = options;
 
@@ -58,7 +61,7 @@ export async function optimizeImage(
     const manipulatedImage = await manipulateAsync(
       imageUri,
       manipulateActions,
-      { compress: quality, format: format }
+      { compress: quality, format: format },
     );
 
     return manipulatedImage.uri;
@@ -102,10 +105,13 @@ export async function chooseImageSource(): Promise<string | null> {
           },
         },
       ],
-      { cancelable: true, onDismiss: () => {
-        console.log("chooseImageSource: Alert dismissed");
-        resolve(null);
-      } }
+      {
+        cancelable: true,
+        onDismiss: () => {
+          console.log("chooseImageSource: Alert dismissed");
+          resolve(null);
+        },
+      },
     );
   });
 }
@@ -118,7 +124,7 @@ export async function pickImageFromLibrary(): Promise<string | null> {
     if (!permissionResult.granted) {
       Alert.alert(
         "Behörighet krävs",
-        "Vi behöver tillgång till ditt fotobibliotek."
+        "Vi behöver tillgång till ditt fotobibliotek.",
       );
       return null;
     }
@@ -169,7 +175,7 @@ export async function uploadImage(
   imageUri: string,
   folder: string,
   fileName: string,
-  optimizationOptions: OptimizationOptions = {}
+  optimizationOptions: OptimizationOptions = {},
 ): Promise<string> {
   try {
     console.log("Starting image upload to Cloudinary...");
@@ -198,7 +204,7 @@ export async function uploadImage(
       {
         method: "POST",
         body: formData,
-      }
+      },
     );
 
     console.log("Upload response status:", uploadResponse.status);
@@ -206,7 +212,9 @@ export async function uploadImage(
     console.log("Cloudinary response:", data);
 
     if (!uploadResponse.ok) {
-      throw new Error(`Upload failed: ${data.error?.message || uploadResponse.statusText}`);
+      throw new Error(
+        `Upload failed: ${data.error?.message || uploadResponse.statusText}`,
+      );
     }
 
     return data.secure_url;
@@ -220,7 +228,7 @@ export async function uploadImage(
 export async function pickAndUploadImage(
   folder: string,
   fileName: string,
-  optimizationOptions: OptimizationOptions = {}
+  optimizationOptions: OptimizationOptions = {},
 ): Promise<string | null> {
   try {
     console.log("=== pickAndUploadImage called ===");
@@ -237,7 +245,7 @@ export async function pickAndUploadImage(
       imageUri,
       folder,
       fileName,
-      optimizationOptions
+      optimizationOptions,
     );
     console.log("Download URL returned:", downloadURL);
     return downloadURL;
@@ -260,7 +268,7 @@ export async function createThumbnail(imageUri: string): Promise<string> {
 export async function uploadImageWithThumbnail(
   imageUri: string,
   folder: string,
-  fileName: string
+  fileName: string,
 ): Promise<{ fullUrl: string; thumbnailUrl: string }> {
   try {
     console.log("Starting full image and thumbnail upload...");
@@ -269,7 +277,7 @@ export async function uploadImageWithThumbnail(
       imageUri,
       folder,
       fileName,
-      OptimizationPresets.plant
+      OptimizationPresets.plant,
     );
     console.log("Full image uploaded:", fullUrl);
 
@@ -290,13 +298,15 @@ export async function uploadImageWithThumbnail(
       {
         method: "POST",
         body: formData,
-      }
+      },
     );
 
     const data = await uploadResponse.json();
 
     if (!uploadResponse.ok) {
-      throw new Error(`Thumbnail upload failed: ${data.error?.message || uploadResponse.statusText}`);
+      throw new Error(
+        `Thumbnail upload failed: ${data.error?.message || uploadResponse.statusText}`,
+      );
     }
 
     const thumbnailUrl = data.secure_url;
