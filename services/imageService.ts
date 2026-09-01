@@ -198,7 +198,6 @@ export async function uploadImage(
       {
         method: "POST",
         body: formData,
-        timeout: 30000,
       }
     );
 

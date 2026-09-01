@@ -70,7 +70,7 @@ export default function LoginScreen() {
         pathname: "/register",
         params: { fromLogin: "true", email: email.trim() },
       });
-    } catch (error) {
+    } catch {
       Alert.alert(
         "Fel",
         "Kunde inte skicka e-post. Kontrollera att e-post och lösenord är rätt.",
