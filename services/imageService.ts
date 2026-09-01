@@ -4,6 +4,7 @@ import * as ImagePicker from "expo-image-picker";
 import { Alert } from "react-native";
 
 // Swap out these values with your own Cloudinary credentials
+// Under Settings > API Keys you will find your Cloud Name and API Key if needed.
 const CLOUDINARY_CLOUD_NAME = "dc4u3rzmx";
 // Below is the unsigned upload preset you need to create in Cloudinary.
 // Settings > Upload > Upload Presets > Add upload preset > Upload Preset Name: roots_uploads > Signing Mode: Unsigned > Save
