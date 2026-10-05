@@ -79,7 +79,7 @@ export async function optimizeImage(
     return { uri: manipulatedImage.uri, mimeType: getMimeType(format) };
   } catch (error) {
     console.error("Error optimizing image:", error);
-    return { uri: imageUri, mimeType: "image/jpeg" };
+    throw error;
   }
 }
 
@@ -237,7 +237,7 @@ export async function uploadImage(
     console.log("Signed parameters received");
 
     const formData = new FormData();
-    formData.append("file", `${optimized.mimeType};base64,${base64}`);
+    formData.append("file", `data:${optimized.mimeType};base64,${base64}`);
     formData.append("api_key", signedParams.apiKey);
     formData.append("timestamp", signedParams.timestamp.toString());
     formData.append("signature", signedParams.signature);
@@ -343,7 +343,7 @@ export async function uploadImageWithThumbnail(
     );
 
     const formData = new FormData();
-    formData.append("file", `${thumbnail.mimeType};base64,${base64}`);
+    formData.append("file", `data:${thumbnail.mimeType};base64,${base64}`);
     formData.append("api_key", signedParams.apiKey);
     formData.append("timestamp", signedParams.timestamp.toString());
     formData.append("signature", signedParams.signature);

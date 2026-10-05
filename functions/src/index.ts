@@ -34,27 +34,28 @@ export const getCloudinarySignature = functions.https.onCall(
     }
 
     try {
+      const userId = context?.auth?.uid;
+
+      // Authorization: users can only upload to their own profile
+      if (folder === "profiles" && fileName !== userId) {
+        throw new functions.https.HttpsError(
+          "permission-denied",
+          "Users can only upload to their own profile folder",
+        );
+      }
+
       const timestamp = Math.floor(Date.now() / 1000);
 
-      // Build upload parameters with restrictions
-      const uploadParams = {
+      // Build parameters for signature (must match exactly what client submits)
+      const signatureParams = {
         public_id: fileName,
         folder: folder,
-        resource_type: "auto",
         timestamp: timestamp,
-        overwrite: true,
-        // Restrictions to prevent abuse
-        allowed_formats: ["jpg", "jpeg", "png", "gif", "webp"],
-        max_file_size: 5242880, // 5MB
-        eager: "c_scale,q_auto,w_500",
-        // Optionally reject if too small (prevent spam)
-        min_width: 100,
-        min_height: 100,
       } as Record<string, unknown>;
 
       // Generate signature using Cloudinary SDK
       const signature = cloudinary.utils.api_sign_request(
-        uploadParams,
+        signatureParams,
         process.env.CLOUDINARY_API_SECRET!,
       );
 
@@ -65,8 +66,6 @@ export const getCloudinarySignature = functions.https.onCall(
         publicId: fileName,
         folder: folder,
         apiKey: process.env.CLOUDINARY_API_KEY,
-        // Return the params that must be sent with the upload
-        params: uploadParams,
       };
     } catch (error) {
       console.error("Error generating Cloudinary signature:", error);
