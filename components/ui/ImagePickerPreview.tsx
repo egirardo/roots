@@ -1,4 +1,5 @@
-import { ActivityIndicator, Image, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, TouchableOpacity, View } from "react-native";
+import { Image } from "expo-image";
 import { ImagePickerPreviewProps } from "../../interfaces/index";
 
 export function ImagePickerPreview({
@@ -15,13 +16,12 @@ export function ImagePickerPreview({
         <Image
           source={{ uri: imageUrl }}
           style={{ width: size, height: height, borderRadius: 16 }}
-          resizeMode="cover"
+          cachePolicy="memory-disk"
         />
       ) : (
         <Image
           source={require("../../assets/profilePicture.png")}
           style={{ width: size, height: height, borderRadius: 16 }}
-          resizeMode="cover"
         />
       )}
       {isUploading && (

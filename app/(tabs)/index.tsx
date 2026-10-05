@@ -2,8 +2,8 @@ import { FeedToggle } from "@/components/ui/profilePage/feedToggle";
 import { Colors } from "@/constants/design-system";
 import { getUserPlants } from "@/services/plantService";
 import { getUserProfile } from "@/services/userService";
-import { useRouter } from "expo-router";
-import { useEffect, useState } from "react";
+import { useRouter, useFocusEffect } from "expo-router";
+import { useCallback, useEffect, useState } from "react";
 import { ScrollView, StyleSheet, RefreshControl } from "react-native";
 import { ProfileCard } from "../../components/ui/profilePage/profileCard";
 import { ProfileFeed } from "../../components/ui/profilePage/profileFeed";
@@ -22,31 +22,33 @@ export default function ProfileScreen() {
   const [plants, setPlants] = useState<Plant[]>([]);
   const [refreshing, setRefreshing] = useState(false);
 
-  const fetchPlants = async () => {
+  const fetchPlants = useCallback(async () => {
     if (!user?.uid) return;
     const userPlants = await getUserPlants(user.uid);
     setPlants(userPlants);
-  };
+  }, [user?.uid]);
 
-  const fetchProfile = async () => {
+  const fetchProfile = useCallback(async () => {
     if (!user?.uid) return;
     const profile = await getUserProfile(user.uid);
     if (profile) {
       setUserProfile(profile);
     }
-  };
+  }, [user?.uid]);
 
   useEffect(() => {
     if (user?.uid) {
       fetchPlants();
     }
-  }, [user?.uid]);
+  }, [user?.uid, fetchPlants]);
 
-  useEffect(() => {
-    if (user?.uid) {
-      fetchProfile();
-    }
-  }, [user?.uid]);
+  useFocusEffect(
+    useCallback(() => {
+      if (user?.uid) {
+        fetchProfile();
+      }
+    }, [user?.uid, fetchProfile])
+  );
 
   const displayedPlants = showAll
     ? plants
