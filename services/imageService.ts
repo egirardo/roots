@@ -2,13 +2,11 @@ import * as FileSystem from "expo-file-system/legacy";
 import { manipulateAsync, SaveFormat } from "expo-image-manipulator";
 import * as ImagePicker from "expo-image-picker";
 import { Alert } from "react-native";
+import { getFunctions, httpsCallable } from "firebase/functions";
+import app from "../firebaseConfig";
 
-// Swap out these values with your own Cloudinary credentials
-// Under Settings > API Keys you will find your Cloud Name and API Key if needed.
 const CLOUDINARY_CLOUD_NAME = "dc4u3rzmx";
-// Below is the unsigned upload preset you need to create in Cloudinary.
-// Settings > Upload > Upload Presets > Add upload preset > Upload Preset Name: roots_uploads > Signing Mode: Unsigned > Save
-const CLOUDINARY_UPLOAD_PRESET = "roots_uploads";
+const functions = getFunctions(app);
 
 export interface OptimizationOptions {
   maxWidth?: number;
@@ -17,10 +15,23 @@ export interface OptimizationOptions {
   format?: SaveFormat;
 }
 
+function getMimeType(format: SaveFormat): string {
+  switch (format) {
+    case SaveFormat.JPEG:
+      return "image/jpeg";
+    case SaveFormat.PNG:
+      return "image/png";
+    case SaveFormat.WEBP:
+      return "image/webp";
+    default:
+      return "image/jpeg";
+  }
+}
+
 export async function optimizeImage(
   imageUri: string,
   options: OptimizationOptions = {},
-): Promise<string> {
+): Promise<{ uri: string; mimeType: string }> {
   const { maxWidth = 1200, quality = 0.7, format = SaveFormat.JPEG } = options;
 
   try {
@@ -65,10 +76,10 @@ export async function optimizeImage(
       { compress: quality, format: format },
     );
 
-    return manipulatedImage.uri;
+    return { uri: manipulatedImage.uri, mimeType: getMimeType(format) };
   } catch (error) {
     console.error("Error optimizing image:", error);
-    return imageUri;
+    return { uri: imageUri, mimeType: "image/jpeg" };
   }
 }
 
@@ -172,6 +183,34 @@ export async function takePhoto(): Promise<string | null> {
   }
 }
 
+async function getCloudinarySignature(
+  folder: string,
+  fileName: string,
+): Promise<{
+  cloudName: string;
+  timestamp: number;
+  signature: string;
+  apiKey: string;
+  folder: string;
+  publicId: string;
+  params: Record<string, unknown>;
+}> {
+  const getSignature = httpsCallable<
+    { folder: string; fileName: string },
+    {
+      cloudName: string;
+      timestamp: number;
+      signature: string;
+      apiKey: string;
+      folder: string;
+      publicId: string;
+      params: Record<string, unknown>;
+    }
+  >(functions, "getCloudinarySignature");
+  const result = await getSignature({ folder, fileName });
+  return result.data;
+}
+
 export async function uploadImage(
   imageUri: string,
   folder: string,
@@ -180,11 +219,11 @@ export async function uploadImage(
 ): Promise<string> {
   try {
     console.log("Starting image upload to Cloudinary...");
-    const optimizedUri = await optimizeImage(imageUri, optimizationOptions);
-    console.log("Image optimized:", optimizedUri);
+    const optimized = await optimizeImage(imageUri, optimizationOptions);
+    console.log("Image optimized:", optimized.uri);
 
     console.log("Reading file to base64...");
-    const base64 = await FileSystem.readAsStringAsync(optimizedUri, {
+    const base64 = await FileSystem.readAsStringAsync(optimized.uri, {
       encoding: FileSystem.EncodingType.Base64,
     });
     console.log("Base64 created, length:", base64.length);
@@ -193,9 +232,15 @@ export async function uploadImage(
       throw new Error("Failed to read image file as base64");
     }
 
+    console.log("Getting signed upload parameters from Cloud Function...");
+    const signedParams = await getCloudinarySignature(folder, fileName);
+    console.log("Signed parameters received");
+
     const formData = new FormData();
-    formData.append("file", `data:image/jpeg;base64,${base64}`);
-    formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
+    formData.append("file", `${optimized.mimeType};base64,${base64}`);
+    formData.append("api_key", signedParams.apiKey);
+    formData.append("timestamp", signedParams.timestamp.toString());
+    formData.append("signature", signedParams.signature);
     formData.append("folder", folder);
     formData.append("public_id", fileName);
 
@@ -262,7 +307,9 @@ export const OptimizationPresets = {
   thumbnail: { maxWidth: 300, quality: 0.7 },
 };
 
-export async function createThumbnail(imageUri: string): Promise<string> {
+export async function createThumbnail(
+  imageUri: string,
+): Promise<{ uri: string; mimeType: string }> {
   return optimizeImage(imageUri, OptimizationPresets.thumbnail);
 }
 
@@ -283,16 +330,25 @@ export async function uploadImageWithThumbnail(
     console.log("Full image uploaded:", fullUrl);
 
     // Skapa och ladda upp thumbnail
-    const thumbnailUri = await createThumbnail(imageUri);
-    const base64 = await FileSystem.readAsStringAsync(thumbnailUri, {
+    const thumbnail = await createThumbnail(imageUri);
+    const base64 = await FileSystem.readAsStringAsync(thumbnail.uri, {
       encoding: FileSystem.EncodingType.Base64,
     });
 
+    const thumbnailFolder = `${folder}/thumbnails`;
+    const thumbnailFileName = `${fileName}_thumb`;
+    const signedParams = await getCloudinarySignature(
+      thumbnailFolder,
+      thumbnailFileName,
+    );
+
     const formData = new FormData();
-    formData.append("file", `data:image/jpeg;base64,${base64}`);
-    formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
-    formData.append("folder", `${folder}/thumbnails`);
-    formData.append("public_id", `${fileName}_thumb`);
+    formData.append("file", `${thumbnail.mimeType};base64,${base64}`);
+    formData.append("api_key", signedParams.apiKey);
+    formData.append("timestamp", signedParams.timestamp.toString());
+    formData.append("signature", signedParams.signature);
+    formData.append("folder", thumbnailFolder);
+    formData.append("public_id", thumbnailFileName);
 
     const uploadResponse = await fetch(
       `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`,
