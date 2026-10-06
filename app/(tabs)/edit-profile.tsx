@@ -47,7 +47,8 @@ export default function EditProfileScreen() {
     }
     try {
       setIsUploading(true);
-      const downloadURL = await pickAndUploadImage("profiles", user?.uid, OptimizationPresets.profile );
+      const timestamp = Date.now();
+      const downloadURL = await pickAndUploadImage("profiles", `${user?.uid}-${timestamp}`, OptimizationPresets.profile );
 
       if (downloadURL) {
         setProfileImageUrl(downloadURL);

@@ -2,11 +2,9 @@ import * as FileSystem from "expo-file-system/legacy";
 import { manipulateAsync, SaveFormat } from "expo-image-manipulator";
 import * as ImagePicker from "expo-image-picker";
 import { Alert } from "react-native";
-import { getFunctions, httpsCallable } from "firebase/functions";
-import app from "../firebaseConfig";
 
 const CLOUDINARY_CLOUD_NAME = "dc4u3rzmx";
-const functions = getFunctions(app);
+const CLOUDINARY_UPLOAD_PRESET = "roots_uploads";
 
 export interface OptimizationOptions {
   maxWidth?: number;
@@ -183,34 +181,6 @@ export async function takePhoto(): Promise<string | null> {
   }
 }
 
-async function getCloudinarySignature(
-  folder: string,
-  fileName: string,
-): Promise<{
-  cloudName: string;
-  timestamp: number;
-  signature: string;
-  apiKey: string;
-  folder: string;
-  publicId: string;
-  params: Record<string, unknown>;
-}> {
-  const getSignature = httpsCallable<
-    { folder: string; fileName: string },
-    {
-      cloudName: string;
-      timestamp: number;
-      signature: string;
-      apiKey: string;
-      folder: string;
-      publicId: string;
-      params: Record<string, unknown>;
-    }
-  >(functions, "getCloudinarySignature");
-  const result = await getSignature({ folder, fileName });
-  return result.data;
-}
-
 export async function uploadImage(
   imageUri: string,
   folder: string,
@@ -232,15 +202,16 @@ export async function uploadImage(
       throw new Error("Failed to read image file as base64");
     }
 
-    console.log("Getting signed upload parameters from Cloud Function...");
-    const signedParams = await getCloudinarySignature(folder, fileName);
-    console.log("Signed parameters received");
+    // Validation for unsigned upload
+    const maxSize = 5242880; // 5MB
+    if (base64.length > maxSize * 1.33) {
+      // base64 is ~33% larger than binary
+      throw new Error("Image exceeds 5MB limit");
+    }
 
     const formData = new FormData();
     formData.append("file", `data:${optimized.mimeType};base64,${base64}`);
-    formData.append("api_key", signedParams.apiKey);
-    formData.append("timestamp", signedParams.timestamp.toString());
-    formData.append("signature", signedParams.signature);
+    formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
     formData.append("folder", folder);
     formData.append("public_id", fileName);
 
@@ -337,16 +308,10 @@ export async function uploadImageWithThumbnail(
 
     const thumbnailFolder = `${folder}/thumbnails`;
     const thumbnailFileName = `${fileName}_thumb`;
-    const signedParams = await getCloudinarySignature(
-      thumbnailFolder,
-      thumbnailFileName,
-    );
 
     const formData = new FormData();
     formData.append("file", `data:${thumbnail.mimeType};base64,${base64}`);
-    formData.append("api_key", signedParams.apiKey);
-    formData.append("timestamp", signedParams.timestamp.toString());
-    formData.append("signature", signedParams.signature);
+    formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
     formData.append("folder", thumbnailFolder);
     formData.append("public_id", thumbnailFileName);
 
