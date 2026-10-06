@@ -20,23 +20,29 @@ export default function LoginScreen() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [resetPasswordLoading, setResetPasswordLoading] = useState(false);
   const [sendVerificationEmailAgain, setSendVerificationEmailAgain] =
     useState(false);
 
   const handleResetPassword = async () => {
+    setResetPasswordLoading(true);
     try {
       await sendPasswordResetEmail(auth, email.trim());
-      Alert.alert(
-        "E-post skickad",
-        "Vi har skickat ett e-postmeddelande med instruktioner för att återställa ditt lösenord till " +
-          email,
-      );
-    } catch {
-      Alert.alert(
-        "Fel",
-        "Kunde inte skicka e-post. Kontrollera att e-post är rätt.",
-      );
+    } catch (err: any) {
+      if (err.code !== "auth/user-not-found") {
+        Alert.alert(
+          "Fel",
+          "Kunde inte skicka e-post. Kontrollera att e-post är rätt.",
+        );
+        setResetPasswordLoading(false);
+        return;
+      }
     }
+    Alert.alert(
+      "E-post skickad",
+      "Om ett konto existerar med denna e-postadress, har vi skickat instruktioner för att återställa lösenordet.",
+    );
+    setResetPasswordLoading(false);
   };
 
   const handleSignIn = async () => {
@@ -132,8 +138,8 @@ export default function LoginScreen() {
         {loading ? "Loggar in.." : "Logga in"}
       </DefaultButton>
 
-      <DefaultButton onPress={handleResetPassword} variant="secondary">
-        Glömt lösenord?
+      <DefaultButton onPress={handleResetPassword} variant="secondary" disabled={resetPasswordLoading}>
+        {resetPasswordLoading ? "Skickar.." : "Glömt lösenord?"}
       </DefaultButton>
 
       <DefaultButton
