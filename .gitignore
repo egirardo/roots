@@ -41,9 +41,6 @@ yarn-error.*
 # typescript
 *.tsbuildinfo
 
-# firebase functions build output
-functions/lib/
-
 app-example
 
 # generated native folders

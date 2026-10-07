@@ -34,7 +34,8 @@ export default function ProfileStep({
 
     try {
       setUploading(true);
-      const downloadURL = await pickAndUploadImage("profiles", user.uid);
+      const timestamp = Date.now();
+      const downloadURL = await pickAndUploadImage("profiles", `${user.uid}-${timestamp}`);
       if (downloadURL) {
         setProfileImageUrl(downloadURL);
       }
