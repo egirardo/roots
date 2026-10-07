@@ -2,10 +2,11 @@ import { DefaultButton } from "@/components/ui/buttons/DefaultButton";
 import { FormLayout } from "@/components/ui/forms/FormLayoutComponent";
 import { DefaultInput } from "@/components/ui/inputs/DefaultInput";
 import { DefaultTextArea } from "@/components/ui/inputs/DefaultTextArea";
+import { NumberInput } from "@/components/ui/inputs/NumberInput";
 import { MultiImagePicker } from "@/components/ui/MultiImagePicker";
 import { CategorySelect } from "@/components/ui/selects/CategorySelect";
 import { DefaultSwitch } from "@/components/ui/switch/DefaultSwitch";
-import { Colors, Spacing, Styles } from "@/constants/design-system";
+import { Spacing, Styles } from "@/constants/design-system";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
@@ -17,6 +18,7 @@ export default function UploadScreen() {
   const { user } = useAuth();
   const [plantName, setPlantName] = useState("");
   const [description, setDescription] = useState("");
+  const [quantity, setQuantity] = useState("");
   const [readyToAdopt, setReadyToAdopt] = useState(false);
   const [plantImages, setPlantImages] = useState<string[]>([]);
   const [categoryId, setCategoryId] = useState("");
@@ -53,6 +55,7 @@ export default function UploadScreen() {
       await createPlant(user?.uid, {
         name: plantName.trim(),
         description: description.trim(),
+        quantity: parseInt(quantity) || 0,
         readyToAdopt: readyToAdopt,
         categoryId: categoryId,
         imageUrl: plantImages[0] || "",
@@ -95,6 +98,12 @@ export default function UploadScreen() {
         value={description}
         onChangeText={setDescription}
         placeholder="Beskrivning..."
+      />
+
+      <NumberInput
+        value={quantity}
+        onChangeText={setQuantity}
+        placeholder="Antal"
       />
 
       <CategorySelect

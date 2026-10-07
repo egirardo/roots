@@ -1,5 +1,5 @@
 import { ProductCard } from "@/components/ui/productCard/ProductCard";
-import { StyleSheet, View, useWindowDimensions } from "react-native";
+import { StyleSheet, View } from "react-native";
 import { ProfileFeedProps } from "../../../interfaces/index";
 
 export function ProfileFeed({
@@ -18,6 +18,7 @@ export function ProfileFeed({
           plantId={plant.id}
           name={plant.name}
           description={plant.description}
+          quantity={plant.quantity}
           image={plant.imageUrl}
           readyToAdopt={plant.readyToAdopt}
           onPress={() => onPlantPress(plant.id)}
