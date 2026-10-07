@@ -1,13 +1,13 @@
 import {
   doc,
   getDoc,
-  setDoc,
-  serverTimestamp,
   runTransaction,
+  serverTimestamp,
+  setDoc,
   Timestamp,
 } from "firebase/firestore";
 import { db } from "../firebaseConfig";
-import { Transfer } from "../interfaces/index"
+import { Transfer } from "../interfaces/index";
 
 //5 tecken
 function generateCode(): string {
@@ -73,14 +73,25 @@ export async function redeemTransfer(
         throw new Error("Du kan inte lösa in din egen kod");
       }
 
-      // Tilldela credits till givaren
+      // Läs giver och planta INNAN några writes
       const giverRef = doc(db, "users", transferData.giverId);
       const giverDoc = await transaction.get(giverRef);
-      
+
+      const plantRef = doc(db, "plants", transferData.plantId);
+      const plantDoc = await transaction.get(plantRef);
+
+      // Tilldela credits till givaren
       const currentCredits = giverDoc.data()?.credits || 0;
 
       transaction.update(giverRef, {
         credits: currentCredits + transferData.credits,
+      });
+
+      // Minska plantans quantity med 1
+      const currentQuantity = plantDoc.data()?.quantity || 0;
+
+      transaction.update(plantRef, {
+        quantity: currentQuantity - 1,
       });
 
       // Markera transfer som använd
@@ -99,7 +110,6 @@ export async function redeemTransfer(
     return { success: false, error: error.message };
   }
 }
-
 
 export async function getTransfer(code: string): Promise<Transfer | null> {
   try {
