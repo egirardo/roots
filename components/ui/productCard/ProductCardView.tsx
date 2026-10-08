@@ -31,7 +31,6 @@ export const ProductCardView = ({
   categoryName,
   onPress,
 }: Omit<ProductCardProps, "variant"> & { categoryName?: string }) => {
-  console.log("ProductCardView quantity:", quantity);
   const {
     distance,
     images,
@@ -152,13 +151,19 @@ export const ProductCardView = ({
           </Pressable>
 
           <View style={styles.cardInfo}>
-            <CardInfo
-              name={name}
-              distance={distance}
-              showLocation={true}
-              headingStyle={Styles.heading1}
-              textContainerStyle={{ flex: 1 }}
-            />
+            <View style={styles.infoContainer}>
+              <CardInfo
+                name={name}
+                distance={distance}
+                showLocation={true}
+                headingStyle={Styles.heading1}
+                textContainerStyle={{ flex: 1 }}
+              />
+
+              <Text style={[Styles.bodyM, styles.quantity]}>
+                Antal: {quantity} st
+              </Text>
+            </View>
 
             <CardActions
               showFavoriteButton={showFavoriteButton}
