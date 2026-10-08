@@ -11,7 +11,7 @@ import {
   where,
 } from "firebase/firestore";
 import { db } from "../firebaseConfig";
-import { Plant, PlantData } from "../interfaces/index"
+import { Plant, PlantData } from "../interfaces/index";
 
 export async function createPlant(userId: string, plantData: PlantData): Promise<string> {
   try {
@@ -19,6 +19,7 @@ export async function createPlant(userId: string, plantData: PlantData): Promise
     await setDoc(plantRef, {
       name: plantData.name,
       description: plantData.description,
+      quantity: plantData.quantity,
       readyToAdopt: plantData.readyToAdopt || false,
       userId: userId,
       categoryId: plantData.categoryId,

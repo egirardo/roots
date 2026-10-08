@@ -143,11 +143,12 @@ export default function ExploreScreen() {
     categoryFilter: string,
     onlyReadyToAdopt: boolean
   ): PlantWithDistance[] => {
-    let filtered = plants;
+    let filtered = plants.filter((plant) => plant.quantity > 0);
 
     if (onlyReadyToAdopt) {
       filtered = filtered.filter((plant) => plant.readyToAdopt === true);
     }
+
     if (categoryFilter !== "all") {
       filtered = filtered.filter(
         (plant) => plant.categoryId === categoryFilter
@@ -262,6 +263,7 @@ export default function ExploreScreen() {
                 plantId={plant.id}
                 name={plant.name}
                 description={plant.description}
+                quantity={plant.quantity}
                 image={plant.imageUrl}
                 imageUrls={plant.imageUrls}
                 categoryName={plant.categoryName}

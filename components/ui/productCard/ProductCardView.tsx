@@ -1,9 +1,9 @@
 import { db } from "@/firebaseConfig";
 import { Image } from "expo-image";
+import { useRouter } from "expo-router";
 import { doc, onSnapshot } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
-import { useRouter } from "expo-router";
 import {
   BorderRadius,
   Colors,
@@ -20,6 +20,7 @@ export const ProductCardView = ({
   plantId,
   name,
   description,
+  quantity,
   image,
   readyToAdopt,
   plantOwnerLat = 0,
@@ -102,13 +103,19 @@ export const ProductCardView = ({
           </View>
 
           <View style={styles.cardInfo}>
-            <CardInfo
-              name={name}
-              distance={distance}
-              showLocation={true}
-              headingStyle={Styles.heading1}
-              textContainerStyle={{ flex: 1 }}
-            />
+            <View style={styles.infoContainer}>
+              <CardInfo
+                name={name}
+                distance={distance}
+                showLocation={true}
+                headingStyle={Styles.heading1}
+                textContainerStyle={{ flex: 1 }}
+              />
+
+              <Text style={[Styles.bodyM, styles.quantity]}>
+                Antal: {quantity} st
+              </Text>
+            </View>
 
             <CardActions
               showFavoriteButton={showFavoriteButton}
@@ -144,13 +151,19 @@ export const ProductCardView = ({
           </Pressable>
 
           <View style={styles.cardInfo}>
-            <CardInfo
-              name={name}
-              distance={distance}
-              showLocation={true}
-              headingStyle={Styles.heading1}
-              textContainerStyle={{ flex: 1 }}
-            />
+            <View style={styles.infoContainer}>
+              <CardInfo
+                name={name}
+                distance={distance}
+                showLocation={true}
+                headingStyle={Styles.heading1}
+                textContainerStyle={{ flex: 1 }}
+              />
+
+              <Text style={[Styles.bodyM, styles.quantity]}>
+                Antal: {quantity} st
+              </Text>
+            </View>
 
             <CardActions
               showFavoriteButton={showFavoriteButton}
@@ -234,5 +247,11 @@ const styles = StyleSheet.create({
     flexDirection: "row-reverse",
     gap: Spacing.s,
     alignItems: "center",
+  },
+  infoContainer: {
+  flex: 1,
+  },
+  quantity: {
+    marginTop: Spacing.xs,
   },
 });

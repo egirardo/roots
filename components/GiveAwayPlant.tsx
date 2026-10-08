@@ -1,10 +1,10 @@
+import { BorderRadius, Colors, Spacing } from '@/constants/design-system';
+import { GiveAwayProps } from '@/interfaces';
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Modal } from 'react-native';
+import { Modal, StyleSheet, Text, View } from 'react-native';
 import QRCode from 'react-native-qrcode-svg';
 import { createTransfer } from '../services/transferService';
 import { DefaultButton } from './ui/buttons/DefaultButton';
-import { GiveAwayProps } from '@/interfaces';
-import { Colors, Spacing, Typography, Styles, BorderRadius } from '@/constants/design-system';
 
 export function GiveAwayPlant({ plantId, plantName, userId }: GiveAwayProps) {
   const [transferCode, setTransferCode] = useState<string | null>(null);

@@ -14,6 +14,7 @@ export interface Plant {
   createdAt?: any;
   adoptedBy?: string | null;
   imageUrls?: string[];
+  quantity: number;
 }
 
 export interface PlantData {
@@ -23,6 +24,7 @@ export interface PlantData {
   categoryId: string;
   imageUrl?: string;
   imageUrls?: string[];
+  quantity: number;
 }
 
 export interface UserProfile {
@@ -60,6 +62,7 @@ export interface ProductCardProps {
   plantId: string;
   name: string;
   description?: string;
+  quantity: number;
   image?: string;
   imageUrls?: string[];
   readyToAdopt?: boolean;

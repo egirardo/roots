@@ -1,9 +1,10 @@
 import { DefaultButton } from "@/components/ui/buttons/DefaultButton";
-import { CategorySelect } from "@/components/ui/selects/CategorySelect";
 import { FormLayout } from "@/components/ui/forms/FormLayoutComponent";
 import { DefaultInput } from "@/components/ui/inputs/DefaultInput";
 import { DefaultTextArea } from "@/components/ui/inputs/DefaultTextArea";
+import { NumberInput } from "@/components/ui/inputs/NumberInput";
 import { MultiImagePicker } from "@/components/ui/MultiImagePicker";
+import { CategorySelect } from "@/components/ui/selects/CategorySelect";
 import { DefaultSwitch } from "@/components/ui/switch/DefaultSwitch";
 import { Colors, Spacing, Styles } from "@/constants/design-system";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -23,6 +24,7 @@ export default function EditPlantScreen() {
   const { user } = useAuth();
   const [plantName, setPlantName] = useState("");
   const [description, setDescription] = useState("");
+  const [quantity, setQuantity] = useState("");
   const [readyToAdopt, setReadyToAdopt] = useState(false);
   const [categoryId, setCategoryId] = useState("");
   const [error, setError] = useState("");
@@ -50,6 +52,7 @@ export default function EditPlantScreen() {
       await updatePlant(plantId, {
         name: plantName,
         description: description,
+        quantity: parseInt(quantity) || 0,
         readyToAdopt: readyToAdopt,
         categoryId: categoryId,
         imageUrl: plantImages[0] || "",
@@ -94,6 +97,12 @@ export default function EditPlantScreen() {
         value={description}
         onChangeText={setDescription}
         placeholder="Beskrivning..."
+      />
+
+      <NumberInput
+        value={quantity}
+        onChangeText={setQuantity}
+        placeholder="Antal"
       />
 
       <CategorySelect

@@ -1,8 +1,8 @@
 import { IconSymbol } from "@/components/ui/icon-symbol";
-import { Styles, Spacing, BorderRadius } from "@/constants/design-system";
+import { BorderRadius, Spacing, Styles } from "@/constants/design-system";
+import { Image } from "expo-image";
 import { StyleSheet, Text, View } from "react-native";
 import { ProfileCardProps } from "../../../interfaces/index";
-import { Image } from "expo-image";
 
 export function ProfileCard({ userProfile }: ProfileCardProps) {
   const profilePictureLink = require("../../../assets/profilePicture.png");
