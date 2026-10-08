@@ -19,6 +19,7 @@ export default function ViewPlantScreen() {
 
   const [plantName, setPlantName] = useState("");
   const [description, setDescription] = useState("");
+  const [quantity, setQuantity] = useState(0);
   const [readyToAdopt, setReadyToAdopt] = useState(false);
   const [id, setId] = useState("");
   const [imageUrl, setImageUrl] = useState("");
@@ -54,6 +55,7 @@ export default function ViewPlantScreen() {
         if (plant) {
           setPlantName(plant.name || "");
           setDescription(plant.description || "");
+          setQuantity(plant.quantity ?? 0);
           setReadyToAdopt(plant.readyToAdopt || false);
           setId(plant.id || "");
           setImageUrl(plant.imageUrl || "");
@@ -157,6 +159,7 @@ export default function ViewPlantScreen() {
         plantId={id}
         name={plantName}
         description={description}
+        quantity={quantity}
         image={imageUrl}
         imageUrls={imageUrls}
         readyToAdopt={readyToAdopt}
