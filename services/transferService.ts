@@ -88,7 +88,11 @@ export async function redeemTransfer(
       });
 
       // Minska plantans quantity med 1
-      const currentQuantity = plantDoc.data()?.quantity || 0;
+      const currentQuantity = plantDoc.data()?.quantity ?? 0;
+
+      if (currentQuantity <= 0) {
+        throw new Error("Plantan är slut");
+      }
 
       transaction.update(plantRef, {
         quantity: currentQuantity - 1,
