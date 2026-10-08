@@ -5,7 +5,8 @@ import { Colors, Styles } from "@/constants/design-system";
 import { useRouter } from "expo-router";
 import {
   sendEmailVerification,
-  signInWithEmailAndPassword
+  sendPasswordResetEmail,
+  signInWithEmailAndPassword,
 } from "firebase/auth";
 import { useState } from "react";
 import { Alert, Image } from "react-native";
@@ -19,8 +20,30 @@ export default function LoginScreen() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [resetPasswordLoading, setResetPasswordLoading] = useState(false);
   const [sendVerificationEmailAgain, setSendVerificationEmailAgain] =
     useState(false);
+
+  const handleResetPassword = async () => {
+    setResetPasswordLoading(true);
+    try {
+      await sendPasswordResetEmail(auth, email.trim());
+    } catch (err: any) {
+      if (err.code !== "auth/user-not-found") {
+        Alert.alert(
+          "Fel",
+          "Kunde inte skicka e-post. Kontrollera att e-post är rätt.",
+        );
+        setResetPasswordLoading(false);
+        return;
+      }
+    }
+    Alert.alert(
+      "E-post skickad",
+      "Om ett konto existerar med denna e-postadress, har vi skickat instruktioner för att återställa lösenordet.",
+    );
+    setResetPasswordLoading(false);
+  };
 
   const handleSignIn = async () => {
     setError("");
@@ -113,6 +136,10 @@ export default function LoginScreen() {
 
       <DefaultButton onPress={handleSignIn} disabled={loading}>
         {loading ? "Loggar in.." : "Logga in"}
+      </DefaultButton>
+
+      <DefaultButton onPress={handleResetPassword} variant="secondary" disabled={resetPasswordLoading}>
+        {resetPasswordLoading ? "Skickar.." : "Glömt lösenord?"}
       </DefaultButton>
 
       <DefaultButton
